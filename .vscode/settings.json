@@ -1,17 +1,19 @@
 {
-  "cSpell.words": [
-    "alsa",
-    "Arkonavt",
-    "dbus",
-    "libxkbcommon",
-    "nspr",
-    "pango",
-    "pkgs",
-    "Xcomposite",
-    "Xdamage",
-    "Xext",
-    "Xfixes",
-    "xorg",
-    "Xrandr"
-  ]
+    "cSpell.words": [
+        "alsa",
+        "Arkonavt",
+        "Catppuccin",
+        "dbus",
+        "libxkbcommon",
+        "Macchiato",
+        "nspr",
+        "pango",
+        "pkgs",
+        "Xcomposite",
+        "Xdamage",
+        "Xext",
+        "Xfixes",
+        "xorg",
+        "Xrandr"
+    ]
 }
