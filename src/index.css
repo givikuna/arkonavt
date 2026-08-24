@@ -1,0 +1,20 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+    --color-bg: #282828;
+    --color-bg-highlight: #3c3836;
+    --color-fg: #ebdbb2;
+    --color-fg-dim: #a89984;
+    --color-border: #504945;
+    --color-accent: #d3869b;
+    --color-accent-2: #b8bb26;
+}
+
+body {
+    background-color: var(--color-bg);
+    color: var(--color-fg);
+    margin: 0;
+    padding: 0;
+}
