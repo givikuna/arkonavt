@@ -1,9 +1,11 @@
-import React, { useEffect, useState } from "react";
-import { Play, FastForward, Rewind } from "lucide-react";
+import React, { useEffect, useState, useRef } from "react";
+import { Play, FastForward, Rewind, Square } from "lucide-react";
 
 import * as O from "fp-ts/Option";
 import * as A from "fp-ts/Array";
 import { pipe } from "fp-ts/function";
+
+import { noop } from "underscore";
 
 import { AppState } from "./types/AppState";
 
@@ -37,6 +39,16 @@ export default function App() {
             isLoading:       true,
         });
 
+    const [localAudioSrc, setLocalAudioSrc]: [
+        O.Option<string>,
+        React.Dispatch<React.SetStateAction<O.Option<string>>>,
+    ] = useState<O.Option<string>>(O.none);
+
+    const [isPlaying, setIsPlaying]: [boolean, React.Dispatch<React.SetStateAction<boolean>>] =
+        useState(false);
+
+    const audioRef = useRef<O.Option<HTMLAudioElement>>(O.none);
+
     useEffect((): void => {
         const loadData: () => Promise<void> = async (): Promise<void> => {
             const [configData, repoData]: [Configuration, Repository] = await Promise.all([
@@ -65,8 +77,79 @@ export default function App() {
         loadData();
     }, []);
 
+    useEffect((): void => {
+        pipe(
+            state.activeSong,
+            O.match(
+                (): void => {
+                    setLocalAudioSrc(O.none);
+                    pipe(
+                        audioRef.current,
+                        O.match(
+                            (): void => noop(),
+                            (html_audio_element: HTMLAudioElement): void =>
+                                html_audio_element.pause(),
+                        ),
+                    );
+                },
+                async (songId): Promise<void> => {
+                    const songObj: O.Option<Song> = pipe(
+                        state.repo,
+                        O.chain((repo: Repository): O.Option<Song> =>
+                            pipe(
+                                repo.songs,
+                                A.findFirst((s: Song): boolean => s.id === songId),
+                            ),
+                        ),
+                    );
+
+                    if (O.isSome(songObj)) {
+                        setLocalAudioSrc(
+                            O.some(
+                                await window.arkonavt.downloadSong(
+                                    songObj.value.url,
+                                    songObj.value.id,
+                                ),
+                            ),
+                        );
+                    }
+                },
+            ),
+        );
+    }, [state.activeSong, state.repo]);
+
+    useEffect((): void => {
+        pipe(
+            localAudioSrc,
+            O.map((src: string): void => {
+                pipe(
+                    audioRef.current,
+                    O.match(
+                        (): void => noop(),
+                        (html_audio_element: HTMLAudioElement): void => (
+                            (html_audio_element.src = src),
+                            html_audio_element.pause()
+                        ),
+                    ),
+                );
+            }),
+        );
+    }, [localAudioSrc]);
+
+    const togglePlay: () => void = (): void =>
+        pipe(
+            audioRef.current,
+            O.match(
+                (): void => noop(),
+                (html_audio_element: HTMLAudioElement): void =>
+                    isPlaying
+                        ? (html_audio_element.pause(), setIsPlaying(false))
+                        : (html_audio_element.play(), setIsPlaying(true)),
+            ),
+        );
+
     if (state.isLoading || O.isNone(state.repo) || O.isNone(state.config)) {
-        return <div className="p-4 text-accent">Loading arkonavt ecosystem...</div>;
+        return <div className="p-4 text-accent">Loading arkonavt...</div>;
     }
 
     const repo: Repository = state.repo.value;
@@ -104,6 +187,14 @@ export default function App() {
 
     return (
         <div className="flex flex-col h-screen bg-bg text-fg font-mono">
+            {/* Audio Element (Hidden)*/}
+            <audio
+                ref={(element: HTMLAudioElement | null): void => {
+                    audioRef.current = O.fromNullable(element);
+                }}
+                onEnded={(): void => setIsPlaying(false)}
+            />
+
             {/* Top Bar / Header */}
             <header className="p-4 border-b border-border flex justify-between items-center">
                 <h1 className="text-xl font-bold text-accent">~arkonavt</h1>
@@ -239,6 +330,43 @@ export default function App() {
                         O.match(
                             (): "---" => "---",
                             (song): string => song.url,
+                        ),
+                    )}
+                </div>
+
+                <div className="flex items-center gap-6 w-1/3 justify-center">
+                    <Rewind
+                        className="cursor-pointer hover:text-accent"
+                        size={20}
+                    />
+
+                    {/* Toggle Play/Pause icon based on state */}
+                    <div onClick={togglePlay}>
+                        {isPlaying ? (
+                            <Square
+                                className="cursor-pointer hover:text-accent"
+                                size={28}
+                            />
+                        ) : (
+                            <Play
+                                className="cursor-pointer hover:text-accent"
+                                size={28}
+                            />
+                        )}
+                    </div>
+
+                    <FastForward
+                        className="cursor-pointer hover:text-accent"
+                        size={20}
+                    />
+                </div>
+
+                <div className="w-1/3 text-right text-xs text-fg-dim flex items-center justify-end">
+                    {pipe(
+                        localAudioSrc,
+                        O.match(
+                            (): string => "Fetching/Downloading...",
+                            (src: string): string => `FILE: ${src.substring(src.length - 25)}`,
                         ),
                     )}
                 </div>

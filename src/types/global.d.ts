@@ -6,7 +6,7 @@ declare global {
         arkonavt: {
             getConfig:     () => Promise<Configuration>;
             getRepository: () => Promise<Repository>;
-            downloadSong:  (url: string) => Promise<string>;
+            downloadSong:  (url: string, id: string) => Promise<string>;
         };
     }
 }
