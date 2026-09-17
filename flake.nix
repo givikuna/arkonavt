@@ -3,57 +3,76 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    flake-utils.url = "github:numtide/flake-utils";
   };
 
   outputs =
+    { self, nixpkgs }:
+    let
+      for-all-systems = nixpkgs.lib.genAttrs [
+        "x86_64-linux"
+        "aarch64-linux"
+        "x86_64-darwin"
+        "aarch64-darwin"
+      ];
+    in
     {
-      self,
-      nixpkgs,
-      flake-utils,
-    }:
-    flake-utils.lib.eachDefaultSystem (
-      system:
-      let
-        pkgs = import nixpkgs { inherit system; };
-      in
-      {
-        devShells.default = pkgs.mkShell {
-          buildInputs = with pkgs; [
-            nodejs_latest
-            yt-dlp
-            ffmpeg
-            git
-          ];
+      devShells = for-all-systems (
+        system:
+        let
+          pkgs = import nixpkgs { inherit system; };
 
-          shellHook = ''
-              export LD_LIBRARY_PATH="${
-                pkgs.lib.makeLibraryPath [
-                  pkgs.glib
-                  pkgs.nss
-                  pkgs.nspr
-                  pkgs.atk
-                  pkgs.at-spi2-atk
-                  pkgs.at-spi2-core
-                  pkgs.cups
-                  pkgs.dbus
-                  pkgs.gtk3
-                  pkgs.pango
-                  pkgs.cairo
-                  pkgs.alsa-lib
-                  pkgs.mesa
-                  pkgs.libxkbcommon
-                  pkgs.xorg.libX11
-                  pkgs.xorg.libXcomposite
-                  pkgs.xorg.libXdamage
-                  pkgs.xorg.libXext
-                  pkgs.xorg.libXfixes
-                  pkgs.xorg.libXrandr
-                ]
-              }:$LD_LIBRARY_PATH"
-            echo "Arkonavt dev shell active. Node, yt-dlp, and ffmpeg loaded."
-          '';
-        };
-      }
-    );
+          mk-scripter =
+            command-name: file-path:
+            let
+              interpreter =
+                let
+                  ext =
+                    let
+                      match = builtins.match ".*\\.([^.]+)$" file-path;
+                    in
+                    if match != null then builtins.head match else throw "couldn't determine ext";
+                in
+                {
+                  "sh" = "${pkgs.bash}/bin/bash";
+                  "elv" = "${pkgs.elvish}/bin/elvish";
+                  "py" = "${pkgs.python3}/bin/python3";
+                  "js" = "${pkgs.nodejs}/bin/node";
+                  "nu" = "${pkgs.nushell}/bin/nu";
+                }
+                .${ext} or (throw "unsupported .${ext}");
+            in
+            pkgs.writeShellScriptBin command-name ''
+              ROOT_DIR=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
+              exec ${interpreter} "$ROOT_DIR/${file-path}" "$@"
+            '';
+        in
+        {
+          default = pkgs.mkShell {
+            packages = with pkgs; [
+              odin
+              ols
+              gdb
+              lldb
+
+              yt-dlp
+
+              nasm
+              clang
+              gnumake
+
+              git
+
+              elvish
+
+              # scripts
+              (mk-scripter "run-main" "scripts/run-main.elv")
+            ];
+
+            shellHook = ''
+              echo "hii"
+            '';
+          };
+        }
+      );
+    };
 }
