@@ -1,29 +1,11 @@
 {
   "cSpell.words": [
-    "alsa",
     "Arkonavt",
-    "Catppuccin",
-    "dbus",
-    "flac",
     "gnumake",
-    "huggingface",
-    "libxkbcommon",
-    "lldb",
-    "Macchiato",
+    "justbuild",
     "nasm",
-    "nspr",
-    "pango",
     "pkgs",
-    "println",
     "scripter",
-    "toplevel",
-    "Tracklist",
-    "Xcomposite",
-    "Xdamage",
-    "Xext",
-    "Xfixes",
-    "xorg",
-    "Xrandr"
-  ],
-  "ols.server.path": "/nix/store/c4rjkwnn0ikzhr6vfwa6ahm5p53vz77w-ols-dev-2026-06/bin/ols"
+    "toplevel"
+  ]
 }

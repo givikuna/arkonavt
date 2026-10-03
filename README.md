@@ -1,3 +1,3 @@
-# arkonavt
+# Arkonavt
 
-Local music player that gives you your music from youtube.
+Arkonavt is a terminal-based text editor/IDE written in Go.

@@ -1,5 +1,5 @@
 {
-  description = "Arkonavt - Local Music Player";
+  description = "Arkonavt - Text Editor in Odin";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
@@ -51,21 +51,15 @@
             packages = with pkgs; [
               odin
               ols
-              gdb
-              lldb
 
-              yt-dlp
-
-              nasm
-              clang
               gnumake
 
-              git
+              just
+              just-formatter
+              just-lsp
+              justbuild
 
               elvish
-
-              # scripts
-              (mk-scripter "run-main" "scripts/run-main.elv")
             ];
 
             shellHook = ''
