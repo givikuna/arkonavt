@@ -2,10 +2,34 @@
   "cSpell.words": [
     "Arkonavt",
     "gnumake",
+    "golangci",
+    "gopls",
+    "gotools",
     "justbuild",
     "nasm",
     "pkgs",
     "scripter",
     "toplevel"
-  ]
+  ],
+
+  "go.useLanguageServer": true,
+  "go.toolsManagement.autoUpdate": false,
+  "go.alternateTools": {
+    "gopls": "gopls",
+    "dlv": "dlv",
+    "golangci-lint": "golangci-lint",
+    "goimports": "goimports"
+  },
+
+  "gopls": {
+    "ui.completion.usePlaceholders": true,
+    "ui.semanticTokens": true
+  },
+
+  "[go]": {
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": "explicit"
+    }
+  }
 }

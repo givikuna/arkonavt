@@ -49,15 +49,12 @@
         {
           default = pkgs.mkShell {
             packages = with pkgs; [
-              odin
-              ols
-
-              gnumake
-
-              just
-              just-formatter
-              just-lsp
-              justbuild
+              go
+              gopls
+              gotools
+              go-tools
+              golangci-lint
+              delve
 
               elvish
             ];
